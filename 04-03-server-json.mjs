@@ -5,11 +5,12 @@ const server = createServer((request, response) => {
 
   response.statusCode = 200;
 
-  response.setHeader("Content-Type", "text/html");
+  response.setHeader("Content-Type", "application/json");
+  response.setHeader("Access-Control-Allow-Origin", "*");
 
-  response.end(
-    "<html><body><h1>This page was served with Node.js!</h1></body></html>"
-  );
+  const jsonResponseBody = JSON.stringify({ location: "Earth" });
+
+  response.end(jsonResponseBody);
 });
 
 server.listen(3000, () => {

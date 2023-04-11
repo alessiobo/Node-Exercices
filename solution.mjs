@@ -1,17 +1,17 @@
 import { createServer } from "node:http";
 
 const server = createServer((request, response) => {
-console.log("request received");
+  console.log("request received");
 
-response.statusCode = 200;
+  response.statusCode = 200;
 
-response.setHeader("Content-Type", "text/html");
+  response.setHeader("Content-Type", "application/json");
 
-response.end(
-"<html><body><h1>Welcome!</h1><p>This server was created using Node.js</p></body></html>"
-);
+  const jsonResponseBody = JSON.stringify({ location: "Mars" });
+
+  response.end(jsonResponseBody);
 });
 
 server.listen(3000, () => {
-console.log('Server running at http://localhost:3000');
+  console.log(`Server running at http://localhost:3000`);
 });
