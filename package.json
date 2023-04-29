@@ -1,7 +1,7 @@
 {
   "name": "node-exercices",
   "version": "1.0.0",
-  "description": "Our HTTP server now sends a JSON response body.\r Change the location in the response to \"Mars\". Run the server and make a request to it with curl using the --verbose flag. What is the value of the Content-Length response header?",
+  "description": "Do\r Write simple Express server that listens on port 3000 (use dotenv to specify the port)\r Create a dummy \"database\" of planets using a let variable. (You will use this data in further exercises.)\r Configure your app (app.use()) to:\r accept JSON from the Client\r log the Client's requests\r Use\r Dummy database with initial data:\r   type Planet = {\r     id: number,\r     name: string,\r   };",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/alessiobo/Node-Exercices#readme",
   "dependencies": {
-    "figlet": "^1.6.0"
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "morgan": "^1.10.0"
   }
 }

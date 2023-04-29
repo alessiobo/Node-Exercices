@@ -1,18 +1,28 @@
-# await the lucky draw results
-Create agetResults function that uses async and await. Inside of the function, call the luckyDraw function for each of the players: Tina, Jorge, Julien
+# Set up a simple Express App
+Do
+Write simple Express server that listens on port 3000 (use dotenv to specify the port)
+Create a dummy "database" of planets using a let variable. (You will use this data in further exercises.)
+Configure your app (app.use()) to:
+accept JSON from the Client
+log the Client's requests
+Use
+Dummy database with initial data:
+  type Planet = {
+    id: number,
+    name: string,
+  };
 
-Log out the resolved value for each promise and handle any promise rejections.
+  type Planets = Planet[];
 
-function luckyDraw(player) {
-  return new Promise((resolve, reject) => {
-    const win = Boolean(Math.round(Math.random()));
-
-    process.nextTick(() => {
-      if (win) {
-        resolve(`${player} won a prize in the draw!`);
-      } else {
-        reject(new Error(`${player} lost the draw.`));
-      }
-    });
-  });
-}
+  let planets: Planets = [
+    {
+      id: 1,
+      name: "Earth",
+    },
+    {
+      id: 2,
+      name: "Mars",
+    },
+  ];
+express-async-errors
+morgan
