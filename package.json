@@ -1,0 +1,23 @@
+{
+  "name": "node-exercices",
+  "version": "1.0.0",
+  "description": "Our HTTP server now sends a JSON response body.\r Change the location in the response to \"Mars\". Run the server and make a request to it with curl using the --verbose flag. What is the value of the Content-Length response header?",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alessiobo/Node-Exercices.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alessiobo/Node-Exercices/issues"
+  },
+  "homepage": "https://github.com/alessiobo/Node-Exercices#readme",
+  "dependencies": {
+    "figlet": "^1.6.0"
+  }
+}
