@@ -1,7 +1,7 @@
 {
   "name": "node-exercices",
   "version": "1.0.0",
-  "description": "Do\r Write simple Express server that listens on port 3000 (use dotenv to specify the port)\r Create a dummy \"database\" of planets using a let variable. (You will use this data in further exercises.)\r Configure your app (app.use()) to:\r accept JSON from the Client\r log the Client's requests\r Use\r Dummy database with initial data:\r   type Planet = {\r     id: number,\r     name: string,\r   };",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,8 +20,12 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-async-errors": "^3.1.1",
     "joi": "^17.9.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.10.0",
+    "pg-promise": "^11.4.3"
   }
 }
