@@ -1,97 +1,68 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const pool = require('../db');
-const passport = require('passport');
-const passportJWT = require('passport-jwt');
-const ExtractJwt = passportJWT.ExtractJwt;
-const JwtStrategy = passportJWT.Strategy;
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const passport = require("./passport");
+const db = require("./db");
+require("dotenv").config();
 
 const router = express.Router();
 
-// configure JWT strategy
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.SECRET_KEY,
-};
-
-const jwtStrategy = new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
+// signup route
+router.post("/signup", async (req, res) => {
+  const { username, password } = req.body;
   try {
-    const user = await pool.query('SELECT * FROM users WHERE id=$1', [jwtPayload.id]);
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    await db.query("INSERT INTO users (username, password) VALUES ($1, $2)", [
+      username,
+      hash,
+    ]);
+    res.json({ msg: "Signup successful. Now you can log in." });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "An error occurred while creating your account." });
+  }
+});
 
-    if (user.rows.length) {
-      return done(null, user.rows[0]);
+// login route
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const { rows } = await db.query("SELECT * FROM users WHERE username=$1", [
+      username,
+    ]);
+    if (rows.length > 0) {
+      const user = rows[0];
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        const payload = { sub: user.id, username: user.username };
+        const token = jwt.sign(payload, process.env.SECRET_KEY);
+        await db.query("UPDATE users SET token=$1 WHERE id=$2", [
+          token,
+          user.id,
+        ]);
+        res.json({ id: user.id, username: user.username, token });
+      } else {
+        res.status(401).json({ error: "Invalid password." });
+      }
     } else {
-      return done(null, false);
+      res.status(401).json({ error: "User not found." });
     }
   } catch (err) {
-    return done(err, false);
+    console.error(err);
+    res.status(500).json({ error: "An error occurred while logging in." });
   }
-});
-
-passport.use(jwtStrategy);
-
-// signup user
-router.post('/signup', async (req, res, next) => {
-  const { username, password } = req.body;
-
-  // check if username already exists
-  const existingUser = await pool.query('SELECT * FROM users WHERE username=$1', [username]);
-
-  if (existingUser.rows.length) {
-    return res.status(409).json({ message: 'Username already exists.' });
-  }
-
-  // hash password
-  const saltRounds = 10;
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  // insert new user into DB
-  const newUser = await pool.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id', [username, hashedPassword]);
-
-  // create JWT token
-  const token = jwt.sign({ id: newUser.rows[0].id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-
-  // update user's token in DB
-  const updatedUser = await pool.query('UPDATE users SET token=$1 WHERE id=$2 RETURNING id, username, token', [token, newUser.rows[0].id]);
-
-  res.json({ user: updatedUser.rows[0] });
-});
-
-// login user
-router.post('/login', async (req, res, next) => {
-  const { username, password } = req.body;
-
-  // check if username exists
-  const user = await pool.query('SELECT * FROM users WHERE username=$1', [username]);
-
-  if (!user.rows.length) {
-    return res.status(401).json({ message: 'Authentication failed. User not found.' });
-  }
-
-  // check if password matches
-  bcrypt.compare(password, user.rows[0].password, async (err, result) => {
-    if (err) {
-      return next(err);
-    }
-
-    if (!result) {
-      return res.status(401).json({ message: 'Authentication failed. Wrong password.' });
-    }
-
-    // create JWT token
-    const token = jwt.sign({ id: user.rows[0].id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-
-    // update user's token in DB
-    const updatedUser = await pool.query('UPDATE users SET token=$1 WHERE id=$2 RETURNING id, username, token', [token, user.rows[0].id]);
-
-    res.json({ user: updatedUser.rows[0] });
-  });
 });
 
 // test authentication
-router.get('/test', passport.authenticate('jwt', { session: false }), (req, res) => {
-    res.send('Authorized');
-    });
-    
-    module.exports = router;
+router.get(
+  "/test",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({ message: "You are authenticated." });
+  }
+);
+
+module.exports = router;
