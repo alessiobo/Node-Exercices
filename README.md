@@ -1,24 +1,15 @@
-# JWT Auth part 1
+# JWT Auth part 3
 Do
-Create users table in Postgres DB.
-Set up Passport authentication with JWT.
-Use SECRET key from .env
+Create route:
+GET /users/logout: log user out (removes JWT from user in DB).
+Create authorize middleware and use it in routes that require it (protected routes).
+Restrict file upload of planet images to users.
 Use
-Use passport and passport-jwt packages
-
-Create users table SQL query:
-
-DROP TABLE IF EXISTS users;
-
-CREATE TABLE users (
-  id SERIAL NOT NULL PRIMARY KEY,
-  username TEXT NOT NULL,
-  password TEXT NOT NULL,
-  token TEXT
-);
-Use dotenv package
-
-Create .env file and store SECRET key
-
-Check
-Use Postman to test the routes.
+SQL query:
+UPDATE users
+SET token=NULL
+WHERE id=$1;
+Make sure that $1 is the user's id
+passport.authenticate() in authorize function
+set session to false in passport.authetnicate (2nd param)
+when successful, do: req.user = user (user comes from (err, user) cb func that passport.authenticate provides (3rd param))
