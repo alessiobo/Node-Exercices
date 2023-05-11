@@ -1,33 +1,28 @@
 const passport = require("passport");
-const JwtStrategy = require("passport-jwt").Strategy;
-const { ExtractJwt } = require("passport-jwt");
-const db = require("./db");
-require("dotenv").config();
+const JWTStrategy = require("passport-jwt").Strategy;
+const ExtractJWT = require("passport-jwt").ExtractJwt;
 
-const secretKey = process.env.SECRET_KEY;
+const pool = require("../db");
 
 passport.use(
-  new JwtStrategy(
+  new JWTStrategy(
     {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: secretKey,
+      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+      secretOrKey: "your_jwt_secret",
     },
-    async (payload, done) => {
+    async (jwt_payload, done) => {
       try {
-        const { rows } = await db.query("SELECT * FROM users WHERE id=$1", [
-          payload.sub,
+        const user = await pool.query("SELECT * FROM users WHERE id=$1", [
+          jwt_payload.id,
         ]);
-        if (rows.length > 0) {
-          const user = rows[0];
-          done(null, user);
+        if (user.rows.length === 0) {
+          return done(null, false);
         } else {
-          done(null, false);
+          return done(null, user.rows[0]);
         }
       } catch (err) {
-        done(err, false);
+        return done(err, false);
       }
     }
   )
 );
-
-module.exports = passport;
