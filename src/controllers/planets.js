@@ -1,71 +1,51 @@
-const pgp = require("pg-promise")();
-const db = pgp(process.env.DATABASE_URL || "postgres://localhost:5432/mydb");
+const express = require("express");
+const router = express.Router();
+const { Pool } = require("pg");
 
-const getAllPlanets = async (req, res) => {
+const pool = new Pool({
+  user: "yourusername",
+  host: "localhost",
+  database: "yourdatabase",
+  password: "yourpassword",
+  port: 5432,
+});
+
+// get all planets
+router.get("/", async (req, res, next) => {
   try {
-    const planets = await db.any("SELECT * FROM planets");
-    res.json(planets);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    const { rows } = await pool.query("SELECT * FROM planets");
+    res.status(200).json(rows);
+  } catch (err) {
+    next(err);
   }
-};
+});
 
-const getPlanetById = async (req, res) => {
-  const id = parseInt(req.params.id);
+// get a single planet by ID
+router.get("/:id", async (req, res, next) => {
   try {
-    const planet = await db.one("SELECT * FROM planets WHERE id = $1", id);
-    res.json(planet);
-  } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Planet not found" });
+    const { id } = req.params;
+    const { rows } = await pool.query("SELECT * FROM planets WHERE id=$1", [
+      id,
+    ]);
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    next(err);
   }
-};
+});
 
-const createPlanet = async (req, res) => {
-  const name = req.body.name;
+// update a planet by ID
+router.put("/:id", async (req, res, next) => {
   try {
-    const newPlanet = await db.one(
-      "INSERT INTO planets (name) VALUES ($1) RETURNING *",
-      name
+    const { id } = req.params;
+    const { name, image } = req.body;
+    const { rows } = await pool.query(
+      "UPDATE planets SET name=$1, image=$2 WHERE id=$3 RETURNING *",
+      [name, image, id]
     );
-    res.status(201).json(newPlanet);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    next(err);
   }
-};
+});
 
-const updatePlanet = async (req, res) => {
-  const id = parseInt(req.params.id);
-  const name = req.body.name;
-  try {
-    const updatedPlanet = await db.one(
-      "UPDATE planets SET name = $1 WHERE id = $2 RETURNING *",
-      [name, id]
-    );
-    res.json(updatedPlanet);
-  } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Planet not found" });
-  }
-};
-
-const deletePlanet = async (req, res) => {
-  const id = parseInt(req.params.id);
-  try {
-    await db.none("DELETE FROM planets WHERE id = $1", id);
-    res.json({ message: "Planet deleted successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(404).json({ message: "Planet not found" });
-  }
-};
-
-module.exports = {
-  getAllPlanets,
-  getPlanetById,
-  createPlanet,
-  updatePlanet,
-  deletePlanet,
-};
+module.exports = router;

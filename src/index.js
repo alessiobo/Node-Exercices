@@ -1,14 +1,31 @@
-const express = require("express");
-const bodyParser = require("body-parser");
+const express = require('express');
+const multer  = require('multer');
+const path = require('path');
+const planetsRouter = require('./planets');
+
 const app = express();
-const port = 3000;
+const upload = multer({ dest: 'uploads/' });
 
-const planetsRoutes = require("./routes/planets");
+// handle JSON parsing
+app.use(express.json());
 
-app.use(bodyParser.json());
+// handle file uploads for planet image
+app.post('/planets/:id/image', upload.single('image'), (req, res, next) => {
+ 
 
-app.use(planetsRoutes);
+  res.status(200).send('File uploaded successfully');
+});
 
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
+// use planets router
+app.use('/planets', planetsRouter);
+
+// handle errors
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// start server
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
 });
